@@ -2,6 +2,10 @@
 Thumbs.db
 ehthumbs.db
 
+#JB ignore
+*.swp
+*py~
+
 # Folder config file
 Desktop.ini
 
