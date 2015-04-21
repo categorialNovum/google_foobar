@@ -9,7 +9,6 @@ def eval(start_wt, actions):
     left = start_wt
     right = 0
     for power,action in enumerate(actions):
-        #print 'power ',power
         w = pow(3, power)
         if action == 'L':
             left = left + w
@@ -17,13 +16,38 @@ def eval(start_wt, actions):
             right = right + w
     return left - right
 
+def add_steps(paths):
+    out = []
+    if len(paths) > 0:
+        for p in paths:
+            out.append(p + list('L'))
+            out.append(p + list('-'))
+            out.append(p + list('R'))
+    else:
+        out.append(list('L'))
+        out.append(list('-'))
+        out.append(list('R'))
+
+    return out
+
+def bfs_search(start_wt):
+    paths = []
+    depth = 1
+    total = start_wt
+    done = False
+    while not done:
+        for p in paths:
+            x = is_balanced(start_wt, p)
+            if is_balanced(start_wt, p):
+                return p
+        paths = add_steps(paths)    
+        depth = depth + 1
+
 def answer(n=1):
-    #actions = list("LR-R")
-    actions = list("RLLR")
     w = n
-    print 'ST WEIGHT : ',w
-    print 'ACTIONS : ',actions
-    print 'EVAL -> : ',eval(w,actions)
+    balance_path = bfs_search(w)
+    print 'ANSWER -> ',balance_path
+    return balance_path
     
 
 
