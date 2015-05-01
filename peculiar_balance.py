@@ -1,55 +1,67 @@
 #!/usr/bin/python
 import sys
 
-def is_balanced(start_weight, actions):
-    return (0 == eval(start_weight, actions))
+class Node():
+    def __init__(self,weight_val,depth=0,prev_balance=0,drift_ct=0,move=None, parent=None):
+        self.weight_val = weight_val
+        self.depth = depth
+        self.balance = prev_balance
+        self.drift_ct = drift_ct
+        self.move = move
+        self.children = []
+        self.parent = parent
+        if move == 'L':
+            self.balance = self.balance + weight_val
+        elif move == 'R':
+            self.balance = self.balance - weight_val
+        elif move == '-':
+            return
+        else:
+            self.balance = weight_val
 
-def eval(start_wt, actions):
-    '''subtract right from left. Return value of Zero is balanced, positive is heavy on the left, negative heavy on the right'''
-    left = start_wt
-    right = 0
-    for power,action in enumerate(actions):
-        w = pow(3, power)
-        if action == 'L':
-            left = left + w
-        elif action == 'R':
-            right = right + w
-    return left - right
+        if parent is not None and parent.move == self.move:
+            self.drift_ct = parent.drift_ct + 1
+        else:
+            self.drift_ct = 0
 
-def add_steps(paths):
-    out = []
-    if len(paths) > 0:
-        for p in paths:
-            out.append(p + list('L'))
-            out.append(p + list('-'))
-            out.append(p + list('R'))
-    else:
-        out.append(list('L'))
-        out.append(list('-'))
-        out.append(list('R'))
+    def add_child(self,weight, move):
+        n = Node(weight, self.depth + 1, self.balance, self.drift_ct, move, self) 
+        self.children.append(n)
 
-    return out
+def get_answer_path(node):
+    path = []
+    while node.parent is not None:
+        path.append(node.move)
+        node = node.parent
+    path.reverse()
+    return path
 
-def bfs_search(start_wt):
-    paths = []
-    depth = 1
-    total = start_wt
+def bfs_search(start_weight):
+    drift_threshold = 10
     done = False
+    root = Node(start_weight)
+    current_level = []
+    current_level.append(root)
     while not done:
-        for p in paths:
-            x = is_balanced(start_wt, p)
-            if is_balanced(start_wt, p):
-                return p
-        paths = add_steps(paths)    
-        depth = depth + 1
+        for node in current_level:
+            if node.balance == 0:
+                done = True
+                return get_answer_path(node)
+        weight = pow(3,node.depth)
+        next_level = []
+        #if node.drift_ct <= drift_threshold:
+        for n in current_level:
+            #print 'DRIFT : ',n.drift_ct
+            if n.drift_ct <= drift_threshold:
+                n.add_child(weight, 'L')
+                n.add_child(weight, '-')
+                n.add_child(weight, 'R')
+            next_level = next_level + n.children
+        current_level = next_level
 
-def answer(n=1):
-    w = n
-    balance_path = bfs_search(w)
-    print 'ANSWER -> ',balance_path
-    return balance_path
-    
-
+def answer(w=1):
+    path = bfs_search(w)
+    print path
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
