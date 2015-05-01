@@ -1,15 +1,19 @@
 #!/usr/bin/python
 import sys
 
+PLUS="+"
+SUB="-"
+ZERO="0"
+
 def negate_bt(digits):
     out = []
     for d in digits:
-        if d == "+":
-            out.append("-")
-        elif d == "-":
-            out.append("+")
+        if d == PLUS:
+            out.append(SUB)
+        elif d == SUB:
+            out.append(PLUS)
         else:
-            out.append(d)
+            out.append(ZERO)
     return out
 
 def decimal_to_balanced_ternary(n):
@@ -19,16 +23,54 @@ def decimal_to_balanced_ternary(n):
     while n != 0:
         r = n % 3
         if r == 0:
-            out.append("0")
+            out.append(ZERO)
         elif r == 1:
-            out.append("+")
+            out.append(PLUS)
         else:
-            out.append("-")
+            out.append(SUB)
             n = n + 1
         n = n // 3
 
     out.reverse()
     return out
+
+#addition
+#   | - | 0 | + |
+#----------------
+# - | -+| - | 0 |
+#----------------
+# 0 | - | 0 | + |
+#----------------
+# + | 0 | + | +-|
+#----------------
+
+def add_bt(a,b):
+    out = []
+    a.reverse()  
+    b.reverse()
+    if len(b) > len(a):
+        tmp = b
+        a = b
+        b = tmp
+
+    carry = False
+    for x in enumerate(a):
+        i = a[x] 
+        j = b[x]
+        if i is not None and j is not None:
+            if i == PLUS and j == PLUS and not carry:
+                out.append(SUB)
+                carry = True
+            if i == PLUS and j == PLUS and carry:
+                out.append(Plus)
+                carry = True
+            if i == SUB and j == SUB and not carry:
+                out.append(PLUS)
+                carry = False
+        elif i is None:
+            out.append(j)
+        elif j is None:
+            out.append(i)
 
 def answer(n=1):
     x = decimal_to_balanced_ternary(n) 
